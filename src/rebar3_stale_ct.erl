@@ -46,27 +46,19 @@ format_error(Reason) ->
 
 run_all(State) ->
     rebar_api:info("stale: running all Common Test suites", []),
-    case rebar_prv_common_test:do(State) of
-        {ok, State1} ->
-            Checksums = rebar3_stale_manifest:current_checksums(State1),
-            rebar3_stale_manifest:save(State1, Checksums),
-            {ok, State1};
-        Error ->
-            Error
-    end.
+    Checksums = rebar3_stale_manifest:current_checksums(State),
+    Result = rebar_prv_common_test:do(State),
+    rebar3_stale_manifest:save(State, Checksums),
+    Result.
 
 run_stale(State) ->
     Current = rebar3_stale_manifest:current_checksums(State),
     case rebar3_stale_manifest:load(State) of
         {error, not_found} ->
             rebar_api:info("stale: no manifest found, running all Common Test suites", []),
-            case rebar_prv_common_test:do(State) of
-                {ok, State1} ->
-                    rebar3_stale_manifest:save(State1, Current),
-                    {ok, State1};
-                Error ->
-                    Error
-            end;
+            Result = rebar_prv_common_test:do(State),
+            rebar3_stale_manifest:save(State, Current),
+            Result;
         {ok, Old} ->
             Changed = rebar3_stale_manifest:changed_modules(Old, Current),
             case Changed of
@@ -98,13 +90,9 @@ run_ct_suites(State, Suites, Current) ->
     {Opts, _} = rebar_state:command_parsed_args(State),
     NewOpts = [{suite, string:join(SuiteStrs, ",")} | Opts],
     State1 = rebar_state:command_parsed_args(State, {NewOpts, []}),
-    case rebar_prv_common_test:do(State1) of
-        {ok, State2} ->
-            rebar3_stale_manifest:save(State2, Current),
-            {ok, State2};
-        Error ->
-            Error
-    end.
+    Result = rebar_prv_common_test:do(State1),
+    rebar3_stale_manifest:save(State, Current),
+    Result.
 
 filter_ct_suites(Modules) ->
     [M || M <- Modules, is_ct_suite(M)].
