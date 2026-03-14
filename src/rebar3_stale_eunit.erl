@@ -6,7 +6,7 @@
 
 -define(PROVIDER, eunit).
 -define(NAMESPACE, stale).
--define(DEPS, [{default, compile}]).
+-define(DEPS, [{default, app_discovery}]).
 
 init(State) ->
     Provider = providers:create([
@@ -15,6 +15,7 @@ init(State) ->
         {module, ?MODULE},
         {bare, true},
         {deps, ?DEPS},
+        {profiles, [test]},
         {example, "rebar3 stale eunit"},
         {opts, [
             {all, $a, "all", boolean, "Run all tests, ignoring stale detection"}
