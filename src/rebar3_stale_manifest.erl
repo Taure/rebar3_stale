@@ -22,12 +22,15 @@ load(State) ->
 
 -spec load_file(file:filename()) -> {ok, map()} | {error, not_found}.
 load_file(Path) ->
+    rebar_api:info("stale: loading manifest from ~s", [Path]),
     case file:consult(Path) of
         {ok, [#{version := ?VERSION, checksums := Checksums}]} ->
             {ok, Checksums};
-        {ok, _} ->
+        {ok, Other} ->
+            rebar_api:info("stale: unexpected manifest format: ~p", [Other]),
             {error, not_found};
-        {error, _} ->
+        {error, Reason} ->
+            rebar_api:info("stale: could not read manifest: ~p", [Reason]),
             {error, not_found}
     end.
 
