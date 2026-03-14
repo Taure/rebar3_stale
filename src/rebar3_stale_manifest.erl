@@ -24,7 +24,8 @@ load(State) ->
 load_file(Path) ->
     rebar_api:info("stale: loading manifest from ~s", [Path]),
     case file:consult(Path) of
-        {ok, [#{version := ?VERSION, checksums := Checksums}]} ->
+        {ok, [#{version := ?VERSION, checksums := Encoded}]} ->
+            Checksums = maps:map(fun(_K, V) -> hex_to_binary(V) end, Encoded),
             {ok, Checksums};
         {ok, Other} ->
             rebar_api:info("stale: unexpected manifest format: ~p", [Other]),
@@ -38,7 +39,9 @@ load_file(Path) ->
 save(State, Checksums) ->
     Path = manifest_path(State),
     filelib:ensure_dir(Path),
-    Term = #{version => ?VERSION, checksums => Checksums},
+    %% Encode binary checksums as hex strings for file:consult/1 compatibility
+    Encoded = maps:map(fun(_K, V) -> binary_to_hex(V) end, Checksums),
+    Term = #{version => ?VERSION, checksums => Encoded},
     Data = io_lib:format("~tp.~n", [Term]),
     ok = file:write_file(Path, Data).
 
@@ -101,3 +104,10 @@ checksum_file(FilePath) ->
     Hash = crypto:hash(md5, Bin),
     Mod = list_to_atom(filename:basename(FilePath, filename:extension(FilePath))),
     {Mod, Hash}.
+
+binary_to_hex(Bin) ->
+    list_to_binary([io_lib:format("~2.16.0b", [B]) || <<B>> <= Bin]).
+
+hex_to_binary(Hex) ->
+    Str = binary_to_list(Hex),
+    list_to_binary([list_to_integer([H, L], 16) || <<H, L>> <= list_to_binary(Str)]).
