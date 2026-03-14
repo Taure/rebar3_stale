@@ -6,7 +6,7 @@
 
 -define(PROVIDER, ct).
 -define(NAMESPACE, stale).
--define(DEPS, [{test, compile}]).
+-define(DEPS, [{default, compile}]).
 
 init(State) ->
     Provider = providers:create([
