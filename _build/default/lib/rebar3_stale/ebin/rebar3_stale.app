@@ -1,0 +1,10 @@
+{application,rebar3_stale,
+             [{description,"Rebar3 plugin for running only stale tests affected by changed modules"},
+              {vsn,"0.0.0"},
+              {registered,[]},
+              {applications,[kernel,stdlib,crypto]},
+              {env,[]},
+              {modules,[rebar3_stale,rebar3_stale_ct,rebar3_stale_deps,
+                        rebar3_stale_eunit,rebar3_stale_manifest]},
+              {licenses,["MIT"]},
+              {links,[{"GitHub","https://github.com/Taure/rebar3_stale"}]}]}.
