@@ -1,6 +1,6 @@
 # rebar3_stale
 
-A rebar3 plugin that runs only tests affected by code changes.
+A rebar3 plugin that runs only tests affected by code changes, like `mix test --stale` for Erlang.
 
 ## Installation
 
